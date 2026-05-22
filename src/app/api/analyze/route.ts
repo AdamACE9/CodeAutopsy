@@ -71,15 +71,17 @@ export async function POST(req: NextRequest) {
     }
 
     // Regular completion for all other modes
+    // Performance uses qwen3-32b reasoning mode — prefix /think activates chain-of-thought
+    const perfUserMessage = mode === 'performance' ? `/think\n\n${userMessage}` : userMessage
     const completion = await groq.chat.completions.create({
       model: modelName,
       messages: [
         { role: 'system', content: systemPrompt },
-        { role: 'user', content: userMessage },
+        { role: 'user', content: perfUserMessage },
       ],
       stream: false,
-      max_tokens: mode === 'roast' ? 4096 : mode === 'score' ? 1024 : mode === 'security' || mode === 'performance' ? 4096 : 2048,
-      temperature: mode === 'score' ? 0.2 : mode === 'security' ? 0.1 : 0.4,
+      max_tokens: mode === 'roast' ? 4096 : mode === 'score' ? 1024 : mode === 'security' || mode === 'performance' ? 8192 : 2048,
+      temperature: mode === 'score' ? 0.2 : mode === 'security' ? 0.1 : mode === 'performance' ? 0.6 : 0.4,
     })
 
     const result = completion.choices[0]?.message?.content || ''
