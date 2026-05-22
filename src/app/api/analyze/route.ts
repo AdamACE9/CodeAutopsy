@@ -5,8 +5,6 @@ import { SYSTEM_PROMPTS } from '@/lib/prompts'
 import { detectLanguage } from '@/lib/detect'
 import type { AnalysisMode } from '@/types'
 
-const groq = new Groq({ apiKey: process.env.GROQ_API_KEY })
-
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
@@ -15,6 +13,8 @@ export async function POST(req: NextRequest) {
       mode: AnalysisMode
       language: string
     }
+
+    const groq = new Groq({ apiKey: process.env.GROQ_API_KEY })
 
     if (!code || !mode) {
       return NextResponse.json({ error: 'Missing code or mode' }, { status: 400 })
